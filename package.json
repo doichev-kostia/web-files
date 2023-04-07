@@ -1,0 +1,21 @@
+{
+	"name": "fastify-test",
+	"private": "true",
+	"version": "1.0.0",
+	"type": "module",
+	"scripts": {},
+	"imports": {
+		"#utils/*.js": "./src/utils/*.js"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.23.8",
+		"fastify": "^4.15.0",
+		"pg": "^8.10.0"
+	},
+	"devDependencies": {
+		"@types/node": "18.15.11",
+		"@types/pg": "^8.6.6",
+		"drizzle-kit": "^0.17.4",
+		"typescript": "^5.0.3"
+	}
+}

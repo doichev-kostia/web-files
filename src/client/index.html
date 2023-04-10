@@ -1,72 +1,55 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+	<meta charset="UTF-8">
+	<meta name="viewport"
+		  content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-stone-800 text-neutral-50">
 <main class="px-5 py-3">
-    <div class="mb-6">
-        <h3 class="mb-3 text-xl font-semibold">Download big file with streams and compression</h3>
-        <a href="http://localhost:8080/files/sql" target="_blank" class="underline-offset-4 underline">Download my
-                                                                                                       sql</a>
-    </div>
+	<section class="mb-6">
+		<h3 class="mb-3 text-xl font-semibold">Download big file with streams and compression</h3>
+		<a href="http://localhost:8080/files/sql" target="_blank" class="underline-offset-4 underline">Download my
+																									   sql</a>
+	</section>
 
-    <div class="mb-6">
-        <h3 class="mb-3 text-xl font-semibold">Upload and compress image before sending</h3>
+	<hr class="h-px my-8 border-0 bg-stone-700">
 
-        <label class="block mb-2 text-sm font-medium text-white" for="file_input">Upload file</label>
-        <input class="block w-full text-sm text-stone-300 border border-stone-300 placeholder-stone-400 rounded-lg cursor-pointer bg-stone-600 focus:outline-none"
-               id="file_input" type="file">
-        <picture class="mt-4 block max-w-xs">
-            <img class="block max-w-full rounded-xl" id="image" src="" alt="">
-        </picture>
-    </div>
 
+	<section class="mb-6">
+		<h3 class="mb-3 text-xl font-semibold">Upload file and see the preview</h3>
+
+		<label class="block mb-2 text-sm font-medium text-white" for="upload-file-input">Upload file</label>
+		<input
+			class="block w-full text-sm text-stone-300 border border-stone-300 placeholder-stone-400 rounded-lg cursor-pointer bg-stone-600 focus:outline-none"
+			id="upload-file-input" type="file">
+		<picture class="mt-4 block max-w-xs">
+			<img class="block max-w-full rounded-xl" id="image" src="" alt="">
+		</picture>
+		<iframe id="file-preview" class="block"></iframe>
+	</section>
+
+	<hr class="h-px my-8 border-0 bg-stone-700">
+
+
+	<section class="mb-6">
+		<h3 class="mb-3 text-xl font-semibold">Upload image and compress it before sending to the BE</h3>
+
+		<label class="block mb-2 text-sm font-medium text-white" for="upload-image-input">Upload image</label>
+		<input
+			class="block w-full text-sm text-stone-300 border border-stone-300 placeholder-stone-400 rounded-lg cursor-pointer bg-stone-600 focus:outline-none"
+			id="upload-image-input" type="file" accept="image/*">
+
+		<div class="mt-5">
+			<canvas id="canvas" class="bg-white border rounded-xl border-stone-300"></canvas>
+		</div>
+	</section>
+
+	<hr class="h-px my-8 border-0 bg-stone-700">
 </main>
-<script>
-    /**
-     *
-     * @type {HTMLInputElement}
-     */
-    const input = document.getElementById("file_input");
-    /**
-     *
-     * @type {HTMLImageElement}
-     */
-    const preview = document.getElementById("image");
-
-    input.addEventListener("change",
-        /**
-         *
-         * @param {Event<HTMLInputElement>} e
-         */
-        ( e ) => {
-            /**
-             * @type {File}
-             */
-            const file = e.target.files[0];
-            if (!file.type.includes('image')) {
-                return;
-            }
-            // option 1
-            // preview.src = URL.createObjectURL(file);
-
-            // option 2
-            const reader = new FileReader();
-
-            reader.addEventListener('load', (event) => {
-                preview.src = event.target.result;
-            })
-
-            reader.readAsDataURL(file);
-
-        });
-
-</script>
+<script type="module" src="./script.js"></script>
 </body>
 </html>

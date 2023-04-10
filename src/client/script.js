@@ -1,3 +1,4 @@
+const AVATAR_STORAGE_KEY = "avatar";
 {
 
 	/**
@@ -64,39 +65,83 @@
 	 *
 	 * @type {HTMLCanvasElement}
 	 */
-	const canvas = document.getElementById("canvas");
+	const canvas = document.createElement("canvas");
 	const ctx = canvas.getContext("2d");
-	const MAX_WIDTH = 300;
+	const MAX_WIDTH = 200;
 
 
 	input.addEventListener("change",
+		/**
+		 * @param {Event<HTMLInputElement>} e
+		 */
+		async ( e ) => {
+			/**
+			 * @type {File}
+			 */
+			const file = e.target.files[0];
+
+			const bitmap = await createImageBitmap(file);
+			// to maintain aspect ratio
+			const scale = MAX_WIDTH / bitmap.width;
+			canvas.width = MAX_WIDTH;
+			canvas.height = bitmap.height * scale;
+
+
+			ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+			ctx.canvas.toBlob(async ( blob ) => {
+					if ( !blob ) {
+						console.error("Canvas is empty");
+						return;
+					}
+					const formData = new FormData();
+					formData.append("file", blob, file.name);
+					const response = await fetch("http://localhost:8080/files/avatar/upload", {
+						method: "POST",
+						body: formData
+					});
+
+					if (!response.ok ) {
+						throw new Error("Upload failed");
+					}
+					/**
+					 *
+					 * @type {{
+					 *     url: string
+					 * }}
+					 */
+					const data = await response.json();
+					localStorage.setItem(AVATAR_STORAGE_KEY, data.url);
+				},
+				"image/png",
+				0.75);
+		});
+}
+{
 	/**
-	 * @param {Event<HTMLInputElement>} e
+	 *
+	 * @type {HTMLDivElement}
 	 */
-	async ( e ) => {
-		const file = e.target.files[0];
+	const avatarContainer = document.getElementById("avatar-container");
+	/**
+	 *
+	 * @type {HTMLDivElement}
+	 */
+	const placeholderAvatar = document.getElementById("placeholder-avatar");
+	/**
+	 *
+	 * @type {HTMLImageElement}
+	 */
+	const avatar = document.getElementById("avatar");
+	const avatarURL = localStorage.getItem(AVATAR_STORAGE_KEY);
 
-		const bitmap = await createImageBitmap(file);
-		// to maintain aspect ratio
-		const scale = MAX_WIDTH / bitmap.width;
-		canvas.width = MAX_WIDTH;
-		canvas.height = bitmap.height * scale;
+	if ( avatarURL ) {
+		avatar.src = avatarURL;
+		avatar.classList.remove("hidden");
+		placeholderAvatar.classList.add("hidden");
+	} else {
+		placeholderAvatar.classList.remove("hidden");
+		avatar.classList.add("hidden");
+	}
 
 
-
-		ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-		ctx.canvas.toBlob(async (blob) => {
-			if (!blob) {
-				console.error("Canvas is empty");
-				return;
-			}
-
-
-
-			const newFile = new File([blob], "resized.jpg", {
-				type: "image/jpeg",
-				lastModified: Date.now()
-			});
-		})
-	})
 }

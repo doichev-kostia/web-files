@@ -10,6 +10,15 @@
 - Audio and Video
 - WebRTC
 - File processing in browser and in node
+- Create an avatar uploader
+	- upload an image and crop it on the client side✅
+	- transform it to a blob and send to the server✅
+	- save it to the DB
+	- add srcset for different extensions (avif, webp, original)
+	- add srcset for different sizes (small, medium, large)
+	- add srcset for different resolutions (1x, 2x, 3x)
+	- those modifications should be included in the URL and should be implemented on the fly
+    - add a cache layer
 
 ### Questions:
 
@@ -34,7 +43,8 @@
 
 Blob - Represents a "Binary Large Object", meaning a file-like object of immutable, raw data. a Blob can be read as text
 or binary data, or converted into a ReadableStream so its methods can be used for processing the data.
-[FileReader](https://developer.mozilla.org/en-US/docs/Web/API/FileReader) - Enables web applications to asynchronously read the contents of files (or raw data buffers) stored on the
+[FileReader](https://developer.mozilla.org/en-US/docs/Web/API/FileReader) - Enables web applications to asynchronously
+read the contents of files (or raw data buffers) stored on the
 user's computer, using File or Blob objects to specify the file or data to read
 URL.createObjectURL() - Creates a URL that can be used to fetch a File or Blob object.
 URL.revokeObjectURL() - Releases an existing object URL which was previously created by calling URL.createObjectURL().
@@ -54,7 +64,8 @@ increased by varying the color intensity of each dot or by increasing the number
 image. However, when a user magnifies a bitmap image enough, it eventually becomes pixelated as the dots resolve into
 tiny squares of color on a grid.
 
-`createImageBitmap` - global [method](https://developer.mozilla.org/en-US/docs/Web/API/createImageBitmap) that creates an [Image Bitmap](https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap)
+`createImageBitmap` - global [method](https://developer.mozilla.org/en-US/docs/Web/API/createImageBitmap) that creates
+an [Image Bitmap](https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap)
 
 ##### MIME type
 

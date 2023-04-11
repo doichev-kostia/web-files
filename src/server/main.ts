@@ -131,14 +131,14 @@ const FileGetterParamsValidator = z.object({
 
 
 const FileGetterQueryValidator = z.object({
-	w: z.number().min(1).max(10_000).optional(),
-	h: z.number().min(1).max(10_000).optional(),
+	w: z.string().optional(),
+	h: z.string().optional(),
 	ext: imageFormat.optional(),
 })
 app.get<{
 	Params: z.infer<typeof FileGetterParamsValidator>,
 	Querystring: z.infer<typeof FileGetterQueryValidator>
-}>('/assets/images/:fileName', async (request, reply) => {
+}>('/assets/images/:fileName', async function getImage(request, reply)  {
 	const {fileName} = FileGetterParamsValidator.parse(request.params);
 	const {w, h, ext} = FileGetterQueryValidator.parse(request.query);
 
@@ -151,19 +151,26 @@ app.get<{
 	const transformer = sharp(file)
 
 	if (w || h) {
-		transformer.resize(w, h)
+		transformer.resize(Number(w) || null, Number(h) || null)
 	}
 
 	if (targetExtension !== extension) {
-		transformer.toFormat(targetExtension)
+		transformer.toFormat(targetExtension, {
+			compressionLevel: 9,
+			palette: true,
+			mozjpeg: true,
+			mixed: true,
+		})
 	}
-
 
 	const buffer = await transformer.toBuffer();
 
 	reply.header('Content-Type', `image/${targetExtension}`);
 	reply.send(buffer);
+})
 
+app.get('/performance/end', () => {
+	process.exit(0);
 })
 
 app.listen({

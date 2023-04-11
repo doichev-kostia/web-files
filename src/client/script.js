@@ -82,9 +82,11 @@ const AVATAR_STORAGE_KEY = "avatar";
 
 			const bitmap = await createImageBitmap(file);
 			// to maintain aspect ratio
-			const scale = MAX_WIDTH / bitmap.width;
-			canvas.width = MAX_WIDTH;
-			canvas.height = bitmap.height * scale;
+			// const scale = MAX_WIDTH / bitmap.width;
+			// canvas.width = MAX_WIDTH;
+			// canvas.height = bitmap.height * scale;
+			canvas.width = bitmap.width;
+			canvas.height = bitmap.height;
 
 
 			ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
@@ -93,9 +95,16 @@ const AVATAR_STORAGE_KEY = "avatar";
 						console.error("Canvas is empty");
 						return;
 					}
+
+					const a = document.createElement("a");
+					a.href = URL.createObjectURL(blob);
+					a.download = file.name;
+					a.click()
+
+
 					const formData = new FormData();
 					formData.append("file", blob, file.name);
-					const response = await fetch("http://localhost:8080/files/avatar/upload", {
+					const response = await fetch("http://127.0.0.1:8080/files/avatar/upload", {
 						method: "POST",
 						body: formData
 					});
@@ -113,7 +122,7 @@ const AVATAR_STORAGE_KEY = "avatar";
 					localStorage.setItem(AVATAR_STORAGE_KEY, data.url);
 				},
 				"image/png",
-				0.75);
+				1);
 		});
 }
 {

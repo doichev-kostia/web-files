@@ -143,12 +143,14 @@ app.get<{
 	const {w, h, ext} = FileGetterQueryValidator.parse(request.query);
 
 	const filePath = path.resolve(escapeDirectoryTraversal('./bucket/images', fileName));
-	const file = await fs.promises.readFile(filePath);
+	const file = await fs.createReadStream(filePath, {
+		highWaterMark: 1 * bytes.megabyte,
+	});
 
 	const extension = imageFormat.parse(removeExtensionDot(path.extname(filePath)));
 	const targetExtension = ext ?? extension;
 
-	const transformer = sharp(file)
+	const transformer = sharp()
 
 	if (w || h) {
 		transformer.resize(Number(w) || null, Number(h) || null)
@@ -163,10 +165,13 @@ app.get<{
 		})
 	}
 
-	const buffer = await transformer.toBuffer();
-
 	reply.header('Content-Type', `image/${targetExtension}`);
-	reply.send(buffer);
+	await pipeline(
+		file,
+		transformer,
+		reply.raw
+	)
+	;
 })
 
 app.get('/performance/end', () => {

@@ -29,3 +29,11 @@ export const FileUploadQueryValidator = z.object({
 	.refine(value => value.storage === 'db' ? value.dbProvider !== undefined : true, {
 		message: 'dbProvider is required when storage is db'
 	})
+
+export const GetFileQueryValidator = z.object({
+	dbProvider: DBProviderValidator
+});
+
+export const GetFileParamsValidator = z.object({
+	fileId: z.string()
+})

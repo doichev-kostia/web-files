@@ -13,7 +13,7 @@ import {
 	FileGetterParamsValidator,
 	FileGetterQueryValidator,
 	FileParamsValidator,
-	FileTypeValidator, FileUploadQueryValidator,
+	FileTypeValidator, FileUploadQueryValidator, GetFileParamsValidator, GetFileQueryValidator,
 	imageFormat
 } from "./contracts.js";
 import {pipeline} from "node:stream/promises";
@@ -188,6 +188,49 @@ app.get<{
 		reply.raw
 	)
 	;
+})
+
+// TODO: implement when I understand Blob, Buffer, TypedArray, ArrayBuffer, etc
+app.get<{
+	Params: z.infer<typeof GetFileParamsValidator>,
+	Querystring: z.infer<typeof GetFileQueryValidator>
+}>('/assets/:fileId', async function getAsset(request, reply) {
+	const {dbProvider} = GetFileQueryValidator.parse(request.query);
+	const {fileId} = request.params;
+
+	reply.header('Content-Type', 'application/octet-stream');
+
+	const streams: {
+		input: NodeJS.ReadableStream,
+		output: NodeJS.WritableStream
+	} = {
+		input: undefined as any,
+		output: reply.raw
+	}
+
+
+	if (dbProvider === "postgres") {
+		const {id, path: filepath, content} = await db.selectFrom("files")
+			.selectAll()
+			.where('id', '=', fileId)
+			.executeTakeFirstOrThrow()
+
+		if (filepath) {
+			streams.input = fs.createReadStream(path.resolve('./bucket', filepath));
+		} else if (content) {
+			throw new Error('Not implemented')
+			// streams.input = content.stream();
+		}
+ 	} else {
+		return reply.status(400).send({
+			message: "Not implemented"
+		})
+	}
+
+	await pipeline(
+		streams.input,
+		streams.output
+	);
 })
 
 app.get('/performance/end', () => {

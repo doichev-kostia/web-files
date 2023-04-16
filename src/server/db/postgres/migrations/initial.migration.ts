@@ -1,11 +1,14 @@
-import { type Kysely } from 'kysely'
+import {type Kysely, sql} from 'kysely'
 
 export async function up(db: Kysely<any>): Promise<void> {
+	await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`.execute(db)
+
 	await db.schema
 		.createTable('files')
-		.addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo('uuid_generate_v4()'))
+		.addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`uuid_generate_v4()`))
 		.addColumn('path', 'text')
-		.addColumn('content', 'binary')
+		// @ts-ignore
+		.addColumn('content', 'bytea')
 		.execute()
 
 }

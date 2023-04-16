@@ -16,7 +16,12 @@ function initMigrator (db: Kysely<any>) {
 	});
 }
 
-export async function migrateToLatest(db: Kysely<any>) {
+type Options = {
+	disconnect?: boolean
+}
+
+export async function migrateToLatest(db: Kysely<any>, options?: Options ) {
+	const { disconnect = true } = options ?? {}
 	const migrator = initMigrator(db);
 	const {results, error} = await migrator.migrateToLatest();
 
@@ -34,5 +39,7 @@ export async function migrateToLatest(db: Kysely<any>) {
 		process.exit(1)
 	}
 
-	await db.destroy()
+	if (disconnect) {
+		await db.destroy()
+	}
 }

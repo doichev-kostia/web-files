@@ -1,11 +1,12 @@
 import {Kysely, PostgresDialect} from "kysely";
-import {Pool} from "pg";
+import pg from "pg";
+import * as process from "node:process";
 
 import {migrateToLatest} from "./migrator.js";
 
 import {type FilesTable} from "./schema/files.js";
 
-interface Database {
+export interface Database {
 	files: FilesTable
 }
 
@@ -14,18 +15,22 @@ type Options = {
 }
 
 export const initDB = async ({runMigrations}: Options) => {
-	 const db = new Kysely<Database>({
-		// Use MysqlDialect for MySQL and SqliteDialect for SQLite.
-		dialect: new PostgresDialect({
-			pool: new Pool({
-				host: 'localhost',
-				database: 'postgres',
-			})
-		})
+	const pool = new pg.Pool({
+		connectionString: process.env.POSTGRES_CONNECTION_STRING
 	});
 
-	 if (runMigrations) {
-		 await migrateToLatest(db);
-	 }
+	const dialect = new PostgresDialect({
+		pool,
+	});
+
+	const db = new Kysely<Database>({
+		dialect
+	});
+
+	if (runMigrations) {
+		await migrateToLatest(db, {disconnect: false});
+	}
+
+	return db;
 }
 

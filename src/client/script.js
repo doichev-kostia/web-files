@@ -82,11 +82,9 @@ const AVATAR_STORAGE_KEY = "avatar";
 
 			const bitmap = await createImageBitmap(file);
 			// to maintain aspect ratio
-			// const scale = MAX_WIDTH / bitmap.width;
-			// canvas.width = MAX_WIDTH;
-			// canvas.height = bitmap.height * scale;
-			canvas.width = bitmap.width;
-			canvas.height = bitmap.height;
+			const scale = MAX_WIDTH / bitmap.width;
+			canvas.width = MAX_WIDTH;
+			canvas.height = bitmap.height * scale;
 
 
 			ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
@@ -95,12 +93,6 @@ const AVATAR_STORAGE_KEY = "avatar";
 						console.error("Canvas is empty");
 						return;
 					}
-
-					const a = document.createElement("a");
-					a.href = URL.createObjectURL(blob);
-					a.download = file.name;
-					a.click()
-
 
 					const formData = new FormData();
 					formData.append("file", blob, file.name);
@@ -112,6 +104,7 @@ const AVATAR_STORAGE_KEY = "avatar";
 					if (!response.ok ) {
 						throw new Error("Upload failed");
 					}
+
 					/**
 					 *
 					 * @type {{

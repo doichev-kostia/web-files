@@ -7,7 +7,7 @@ import {randomUUID} from "node:crypto"
 import sharp from "sharp";
 import {readScript} from "./readScript.js";
 import {logger} from "./logger.js";
-import {bytes} from "./constants.js";
+import {bytes} from "./constants.ts";
 import {escapeDirectoryTraversal, isImage, removeExtensionDot} from "./utils.js";
 import {imageFormat} from "./contracts.js";
 import {pipeline} from "node:stream/promises";
@@ -144,7 +144,7 @@ app.get<{
 
 	const filePath = path.resolve(escapeDirectoryTraversal('./bucket/images', fileName));
 	const file = await fs.createReadStream(filePath, {
-		highWaterMark: 1 * bytes.megabyte,
+		highWaterMark: bytes.megabyte,
 	});
 
 	const extension = imageFormat.parse(removeExtensionDot(path.extname(filePath)));

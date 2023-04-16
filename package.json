@@ -13,7 +13,7 @@
 		"@fastify/cors": "^8.2.1",
 		"@fastify/multipart": "^7.6.0",
 		"@fastify/sensible": "^5.2.0",
-		"drizzle-orm": "^0.23.8",
+		"dotenv": "^16.0.3",
 		"fastify": "^4.15.0",
 		"pg": "^8.10.0",
 		"pino": "^8.11.0",
@@ -28,7 +28,6 @@
 		"@types/pg": "^8.6.6",
 		"@types/sharp": "^0.31.1",
 		"chokidar": "^3.5.3",
-		"drizzle-kit": "^0.17.4",
 		"typescript": "^5.0.3"
 	},
 	"packageManager": "pnpm@7.30.5"

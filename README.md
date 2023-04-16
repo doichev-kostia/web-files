@@ -14,6 +14,8 @@
 	- upload an image and crop it on the client side✅
 	- transform it to a blob and send to the server✅
 	- save it to the DB
+      - Postgres
+      - MongoDB
 	- add srcset for different extensions (avif, webp, original)
 	- add srcset for different sizes (small, medium, large)
 	- add srcset for different resolutions (1x, 2x, 3x)

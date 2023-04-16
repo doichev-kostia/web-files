@@ -14,9 +14,18 @@ export const FileGetterParamsValidator = z.object({
 	})
 })
 
-
 export const FileGetterQueryValidator = z.object({
 	w: z.string().optional(),
 	h: z.string().optional(),
 	ext: imageFormat.optional(),
 })
+
+export const FileStorageValidator = z.enum(['db', 'fs']);
+export const DBProviderValidator = z.enum(['postgres', 'mongo']);
+export const FileUploadQueryValidator = z.object({
+	storage: FileStorageValidator,
+	dbProvider: DBProviderValidator.optional()
+})
+	.refine(value => value.storage === 'db' ? value.dbProvider !== undefined : true, {
+		message: 'dbProvider is required when storage is db'
+	})

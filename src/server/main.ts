@@ -13,10 +13,13 @@ import {
 	FileGetterParamsValidator,
 	FileGetterQueryValidator,
 	FileParamsValidator,
-	FileTypeValidator,
+	FileTypeValidator, FileUploadQueryValidator,
 	imageFormat
 } from "./contracts.js";
 import {pipeline} from "node:stream/promises";
+import {loadEnv} from "./loadEnv.js";
+
+loadEnv();
 
 const app = fastify({
 	logger: true,
@@ -60,7 +63,11 @@ app.post('/files/upload', async (request, reply) => {
 	})
 })
 
-app.post('/files/avatar/upload', async (request, reply) => {
+app.post<{
+	Querystring: z.infer<typeof FileUploadQueryValidator>
+}>('/files/avatar/upload', async (request, reply) => {
+	const {storage} = FileUploadQueryValidator.parse(request.query);
+
 	reply.header('Content-Type', 'application/json')
 	const abortController = new AbortController();
 	request.raw.on('close', () => {
@@ -164,7 +171,7 @@ app.get('/performance/end', () => {
 })
 
 app.listen({
-	port: 8080
+	port: Number(process.env.PORT)
 }, (error, address) => {
 	if (error) {
 		logger.error(error);

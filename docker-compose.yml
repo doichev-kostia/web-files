@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:15
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db_data/postgres:/var/lib/postgresql
+    environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: postgres
+
+  mongo:
+    container_name: mongo
+    image: mongo:6.0.5
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./db_data/mongo:/data/db
+    environment:
+        MONGO_INITDB_DATABASE: mongo

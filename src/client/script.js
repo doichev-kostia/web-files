@@ -96,7 +96,7 @@ const AVATAR_STORAGE_KEY = "avatar";
 
 					const formData = new FormData();
 					formData.append("file", blob, file.name);
-					const response = await fetch("http://127.0.0.1:8080/files/avatar/upload", {
+					const response = await fetch("http://127.0.0.1:8080/files/upload?storage=db&dbProvider=postgres", {
 						method: "POST",
 						body: formData
 					});

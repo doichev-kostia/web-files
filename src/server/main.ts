@@ -18,6 +18,8 @@ import {
 } from "./contracts.js";
 import {pipeline} from "node:stream/promises";
 import {loadEnv} from "./loadEnv.js";
+import {type Database, initDB} from "./db/postgres/init.js";
+import {type Kysely} from "kysely";
 
 loadEnv();
 
@@ -30,9 +32,20 @@ app.register(import('@fastify/cors'), {
 	origin: '*',
 	methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
 })
+
 app.register(import('@fastify/multipart'))
 
+const db = await initDB({runMigrations: true})
 
+declare module 'fastify' {
+	export interface FastifyRequest {
+		db: Kysely<Database>
+	}
+}
+app.addHook('onRequest', (request, reply, done) => {
+	request.db = db
+	done()
+})
 
 const filePathMap: Record<z.infer<typeof FileTypeValidator>, string> = {
 	sql: './bucket/script.sql',
@@ -56,31 +69,42 @@ app.get<{
 	}
 })
 
-app.post('/files/upload', async (request, reply) => {
-	reply.header('Content-Type', 'application/json')
-	reply.send({
-		url: 'http://localhost:8080/assets/resized.jpg'
-	})
-})
 
 app.post<{
 	Querystring: z.infer<typeof FileUploadQueryValidator>
-}>('/files/avatar/upload', async (request, reply) => {
-	const {storage} = FileUploadQueryValidator.parse(request.query);
+}>('/files/upload', async (request, reply) => {
+	const {storage, dbProvider} = FileUploadQueryValidator.parse(request.query);
+	const abortController = new AbortController();
 
 	reply.header('Content-Type', 'application/json')
-	const abortController = new AbortController();
 	request.raw.on('close', () => {
 		abortController.abort();
 	})
+
 	try {
 		const file = await request.file({
-			highWaterMark: 10 * bytes.megabyte,
-			limits: {fileSize: 2 * bytes.megabyte}
+			highWaterMark: 10 * bytes.megabyte
 		})
 		if (!file?.filename) {
 			throw new Error('File should have name')
 		}
+
+
+		if (storage === 'db') {
+			const content = file.file.read();
+			const {id} = await db.insertInto('files')
+				.values({
+					content,
+				})
+				.returning('id')
+				.executeTakeFirstOrThrow()
+
+			reply.send({
+				url: `http://localhost:8080/assets/${id}`
+			})
+			return;
+		}
+
 		let extension = removeExtensionDot(path.extname(file.filename))
 
 
@@ -114,7 +138,7 @@ app.post<{
 
 
 		await pipeline(
-		// @ts-ignore
+			// @ts-ignore
 			...streams
 		)
 
@@ -130,7 +154,7 @@ app.post<{
 app.get<{
 	Params: z.infer<typeof FileGetterParamsValidator>,
 	Querystring: z.infer<typeof FileGetterQueryValidator>
-}>('/assets/images/:fileName', async function getImage(request, reply)  {
+}>('/assets/images/:fileName', async function getImage(request, reply) {
 	const {fileName} = FileGetterParamsValidator.parse(request.params);
 	const {w, h, ext} = FileGetterQueryValidator.parse(request.query);
 

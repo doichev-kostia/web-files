@@ -7,9 +7,15 @@ import {randomUUID} from "node:crypto"
 import sharp from "sharp";
 import {readScript} from "./readScript.js";
 import {logger} from "./logger.js";
-import {bytes} from "./constants.ts";
+import {bytes} from "./constants.js";
 import {escapeDirectoryTraversal, isImage, removeExtensionDot} from "./utils.js";
-import {imageFormat} from "./contracts.js";
+import {
+	FileGetterParamsValidator,
+	FileGetterQueryValidator,
+	FileParamsValidator,
+	FileTypeValidator,
+	imageFormat
+} from "./contracts.js";
 import {pipeline} from "node:stream/promises";
 
 const app = fastify({
@@ -23,17 +29,7 @@ app.register(import('@fastify/cors'), {
 })
 app.register(import('@fastify/multipart'))
 
-// ✅ GET /files/sql - read a huge file from disk, send it via node streams to the client and gzip it on the fly
-// POST /files/upload - optimize the image and save it to disk
-// GET /files/binary
-// GET /files/video
-// GET /files/audio
 
-const FileTypeValidator = z.enum(['sql', 'video', 'audio', 'binary']);
-
-const FileParamsValidator = z.object({
-	type: FileTypeValidator
-});
 
 const filePathMap: Record<z.infer<typeof FileTypeValidator>, string> = {
 	sql: './bucket/script.sql',
@@ -51,7 +47,7 @@ app.get<{
 	if (type === "sql") {
 		await readScript(filePath, reply);
 	} else {
-		reply.send({
+		reply.status(400).send({
 			message: 'Not implemented'
 		})
 	}
@@ -123,18 +119,7 @@ app.post('/files/avatar/upload', async (request, reply) => {
 	}
 })
 
-const FileGetterParamsValidator = z.object({
-	fileName: z.string().min(4).refine(value => value.includes('.'), {
-		message: 'file name must contain the extension'
-	})
-})
 
-
-const FileGetterQueryValidator = z.object({
-	w: z.string().optional(),
-	h: z.string().optional(),
-	ext: imageFormat.optional(),
-})
 app.get<{
 	Params: z.infer<typeof FileGetterParamsValidator>,
 	Querystring: z.infer<typeof FileGetterQueryValidator>
